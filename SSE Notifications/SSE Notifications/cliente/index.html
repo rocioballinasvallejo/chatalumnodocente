@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notificaciones y Mensajes</title>
+    <link rel="stylesheet" href="/cliente/index.css">
+</head>
+<body>
+   
+    <div class="alumnos" id="notificaciones">
+        <h1>alumnos</h1>
+    </div>
+
+    <div class="profesor" id="mensajes">
+        <h1>profesor</h1>
+    </div>
+
+
+ 
+    <div class="form-container">
+        <form id="messageForm">
+            <label for="role">rol:</label>
+            <select id="role" name="role">
+                <option value="alumnos">Alumno</option>
+                <option value="profesor">Profesor</option>
+            </select>
+
+            <label for="message">Mensaje:</label>
+            <input type="text" id="message" name="message" required>
+
+            <button type="submit">Enviar</button>
+        </form>
+    </div>
+
+    <script>
+        const eventosSource = new EventSource('http://localhost:3000/new-event');
+
+        eventosSource.addEventListener('notificacion', function(event) {
+            const notificacionesDiv = document.getElementById('notificaciones');
+            const newNotificacion = document.createElement('div');
+            newNotificacion.className = 'notificacion';
+            newNotificacion.textContent = event.data;
+            notificacionesDiv.appendChild(newNotificacion);
+            console.log('Notificación:', event.data);
+        });
+
+        eventosSource.addEventListener('mensaje', function(event) {
+            const mensajesDiv = document.getElementById('mensajes');
+            const newMensaje = document.createElement('div');
+            newMensaje.className = 'mensaje';
+            newMensaje.textContent = event.data;
+            mensajesDiv.appendChild(newMensaje);
+            console.log('Mensaje:', event.data);
+        });
+
+        eventosSource.addEventListener('admin', function(event) {
+            const administrativosDiv = document.getElementById('administrativos');
+            const newAdministracion = document.createElement('div');
+            newAdministracion.className = 'admin';
+            newAdministracion.textContent = event.data;
+            administrativosDiv.appendChild(newAdministracion);
+            console.log('Administración:', event.data);
+        });
+
+        eventosSource.onerror = function(err) {
+            console.error('EventSource failed:', err);
+        };
+
+       
+        document.getElementById('messageForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const role = document.getElementById('role').value;
+            const message = document.getElementById('message').value;
+
+            let targetDiv;
+            switch (role) {
+                case 'alumnos':
+                    targetDiv = document.getElementById('notificaciones');
+                    break;
+                case 'profesor':
+                    targetDiv = document.getElementById('mensajes');
+                    break;
+                
+                default:
+                    console.error('válido');
+                    return;
+            }
+
+            const newMessageDiv = document.createElement('div');
+            newMessageDiv.className = role.slice(0, -1); 
+            newMessageDiv.textContent = message;
+            targetDiv.appendChild(newMessageDiv);
+        });
+    </script>
+</body>
+</html>
